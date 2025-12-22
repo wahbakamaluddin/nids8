@@ -55,6 +55,7 @@ class FeatureMapper:
 
         self.feature_callback = feature_callback
         self.scaler = scaler
+        self._features_mapped = 0
         
     
     def map_features(
@@ -74,7 +75,15 @@ class FeatureMapper:
 
     
     def _to_array(self, features: Dict[str, Any]) -> np.ndarray:
-        values = [features[k] for k in self.REQUIRED_FEATURES]
+        """Convert features dictionary to array, filling missing features with 0."""
+        values = []
+        for feature_name in self.REQUIRED_FEATURES:
+            if feature_name in features:
+                values.append(features[feature_name])
+            else:
+                # Log missing feature and use default value
+                print(f"Warning: Missing feature '{feature_name}', using default value 0")
+                values.append(0.0)
         return np.array([values], dtype=np.float64)
     
     def scale(self, features: np.ndarray) -> np.ndarray:

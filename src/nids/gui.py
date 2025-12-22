@@ -248,14 +248,14 @@ class gui:
                 elapsed = current_time - last_time
                 
                 if elapsed >= 1.0:
-                    # Get current packet count
-                    current_packet_count = self.main.packets_captured
+                    # Get current packet count from packet capturer component
+                    current_packet_count = self.main.packet_capturer.packets_captured
                     
                     # Calculate throughput
                     packets_diff = current_packet_count - last_packet_count
                     self.throughput_value = int(packets_diff / elapsed)
                     self.packet_count = current_packet_count
-                    self.flow_count = self.main.active_flows
+                    self.flow_count = self.main.packet_parser.flows_completed
                     
                     # Update for next iteration
                     last_packet_count = current_packet_count
@@ -289,10 +289,9 @@ class gui:
                 self.main.stop()
                 
                 # Log final statistics
-                stats = self.main.get_statistics()
-                self._update_log_widget(f"[*] Final stats: {stats['packets_captured']} packets, ")
-                self._update_log_widget(f"{stats['flows_completed']} flows, ")
-                self._update_log_widget(f"{stats['attacks_detected']} attacks detected\n")
+                self._update_log_widget(f"[*] Final stats: {self.main.packet_capturer.packets_captured} packets, ")
+                self._update_log_widget(f"{self.main.packet_parser.flows_completed} flows, ")
+                self._update_log_widget(f"{getattr(self.main.anomaly_detector, 'attacks_detected', 0)} attacks detected\n")
                 
             except Exception as e:
                 self._update_log_widget(f"[ERROR] Error stopping capture: {str(e)}\n")

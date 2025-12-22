@@ -70,3 +70,8 @@ class PacketCapturer:
     def is_capturing(self) -> bool:
         """Check if packet capture is currently active."""
         return self._is_capturing
+    
+    @property
+    def packets_captured(self) -> int:
+        """Get the number of packets captured."""
+        return self._packets_captured

@@ -135,3 +135,8 @@ class PacketParser:
             self._flows_completed += 1
             if self.flow_callback:
                 self.flow_callback(flow)
+
+    @property
+    def flows_completed(self) -> int:
+        """Get the number of completed flows."""
+        return self._flows_completed

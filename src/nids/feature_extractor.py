@@ -43,44 +43,46 @@ class FeatureExtractor:
         )
         
         
-        # Build complete feature dictionary
+        # Build complete feature dictionary - EXACTLY matching ML training features
         all_features = {
-            # Backward packet length features
-            "Bwd Packet Length Std": packet_length.get_std(PacketDirection.REVERSE),
-            "Bwd Packet Length Mean": packet_length.get_mean(PacketDirection.REVERSE),
-            "Bwd Packet Length Max": packet_length.get_max(PacketDirection.REVERSE),
-            "Bwd Packet Length Min": packet_length.get_min(PacketDirection.REVERSE),
+            # Flow-level
+            'Flow Duration': flow.duration * 1_000_000,  # microseconds
+            'Flow Packets/s': packet_count.get_rate(),
+            'Flow Bytes/s': flow_bytes.get_rate(),
+            'Flow IAT Mean': flow_iat["mean"] * 1_000_000,
+            'Flow IAT Max': flow_iat["max"] * 1_000_000,
+            'Flow IAT Std': flow_iat["std"] * 1_000_000,
             
-            # Forward packet length features
-            "Total Length of Fwd Packets": packet_length.get_total(PacketDirection.FORWARD),
-            "Fwd Packet Length Max": packet_length.get_max(PacketDirection.FORWARD),
-            "Fwd Packet Length Mean": packet_length.get_mean(PacketDirection.FORWARD),
-            "Fwd Packet Length Std": packet_length.get_std(PacketDirection.FORWARD),
-            "Fwd Packet Length Min": packet_length.get_min(PacketDirection.FORWARD),
+            # Forward features
+            'Fwd Header Length': flow_bytes.get_forward_header_bytes(),
+            'Fwd IAT Total': forward_iat["total"] * 1_000_000,
+            'Fwd IAT Mean': forward_iat["mean"] * 1_000_000,
+            'Fwd IAT Max': forward_iat["max"] * 1_000_000,
+            'Fwd IAT Std': forward_iat["std"] * 1_000_000,
+            'Fwd Packet Length Min': packet_length.get_min(PacketDirection.FORWARD),
+            'Fwd Packet Length Max': packet_length.get_max(PacketDirection.FORWARD),
+            'Fwd Packet Length Mean': packet_length.get_mean(PacketDirection.FORWARD),
+            'Fwd Packet Length Std': packet_length.get_std(PacketDirection.FORWARD),
+            'Subflow Fwd Bytes': flow_bytes.get_bytes_sent(),
+            'Total Fwd Packets': packet_count.get_total(PacketDirection.FORWARD),
+            'Total Length of Fwd Packets': packet_length.get_total(PacketDirection.FORWARD),
             
-            # Packet count features
-            "Total Fwd Packets": packet_count.get_total(PacketDirection.FORWARD),
-            "Total Backward Packets": packet_count.get_total(PacketDirection.REVERSE),
+            # Backward features
+            'Bwd Header Length': flow_bytes.get_reverse_header_bytes(),
+            'Bwd Packet Length Min': packet_length.get_min(PacketDirection.REVERSE),
+            'Bwd Packet Length Max': packet_length.get_max(PacketDirection.REVERSE),
+            'Bwd Packet Length Std': packet_length.get_std(PacketDirection.REVERSE),
+            'Bwd Packets/s': packet_count.get_rate(PacketDirection.REVERSE),
+            'Init_Win_bytes_backward': 0,  # TCP window size - requires deeper packet analysis
             
-            # Inter-arrival time features (converted to microseconds)
-            "Flow IAT Max": flow_iat["max"] * 1_000_000,
-            "Flow IAT Min": flow_iat["min"] * 1_000_000,
-            "Flow IAT Mean": flow_iat["mean"] * 1_000_000,
-            "Flow IAT Std": flow_iat["std"] * 1_000_000,
-            "Fwd IAT Total": forward_iat["total"] * 1_000_000,
-            "Fwd IAT Mean": forward_iat["mean"] * 1_000_000,
-            "Fwd IAT Std": forward_iat["std"] * 1_000_000,
-            "Fwd IAT Max": forward_iat["max"] * 1_000_000,
-            "Fwd IAT Min": forward_iat["min"] * 1_000_000,
-            "Bwd IAT Total": backward_iat["total"] * 1_000_000,
-            "Bwd IAT Mean": backward_iat["mean"] * 1_000_000,
-            "Bwd IAT Std": backward_iat["std"] * 1_000_000,
-            "Bwd IAT Max": backward_iat["max"] * 1_000_000,
-            "Bwd IAT Min": backward_iat["min"] * 1_000_000,
-            
-            # Flow byte rate features
-            "Flow Bytes/s": flow_bytes.get_rate(),
-            "Flow Packets/s": packet_count.get_rate(),
+            # Packet-level
+            'Packet Length Mean': packet_length.get_mean(),
+            'Packet Length Std': packet_length.get_std(),
+            'Packet Length Variance': packet_length.get_var(),
+            'Average Packet Size': packet_length.get_mean(),
+            'PSH Flag Count': 0,  # TCP flag count - requires deeper packet analysis  
+            'Init_Win_bytes_forward': 0,  # TCP window size - requires deeper packet analysis
+            'Max Packet Length': packet_length.get_max(),
             
             # Flow metadata (useful for logging/reporting)
             "Src IP": flow.src_ip,
@@ -88,7 +90,6 @@ class FeatureExtractor:
             "Src Port": flow.src_port,
             "Dst Port": flow.dest_port,
             "Protocol": flow.protocol,
-            "Flow Duration": flow.duration * 1_000_000,  # microseconds
         }
         
         features = all_features

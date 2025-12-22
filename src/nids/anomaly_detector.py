@@ -32,6 +32,11 @@ class AnomalyDetector:
         self.binary_model = binary_model
         self.multi_class_model = multi_class_model
         self.detection_callback = detection_callback
+        
+        # Statistics
+        self._flows_analyzed = 0
+        self._attacks_detected = 0
+        self._attack_counts = {}
 
 
     def _is_attack(self, binary_pred) -> bool:
@@ -164,3 +169,8 @@ class AnomalyDetector:
         
         if multi_class_model_path:
             self.multi_class_model = joblib.load(multi_class_model_path)
+
+    @property
+    def attacks_detected(self) -> int:
+        """Get the number of attacks detected."""
+        return self._attacks_detected
