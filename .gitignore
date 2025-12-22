@@ -82,7 +82,7 @@ Thumbs.db
 # ================================
 # ML / data artifacts (adjust as needed)
 # ================================
-.joblib
+*.joblib
 
 # ================================
 # CSV / large generated files
