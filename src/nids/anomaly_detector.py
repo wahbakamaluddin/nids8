@@ -83,11 +83,8 @@ class AnomalyDetector:
                     # Stage 2: Multi-class classification
                     if self.multi_class_model is not None:
                         prediction, probabilities = self._classify_attack_type(X, flow_metadata)
-                        
-                        # Get confidence from multi-class model
-                        if hasattr(self.multi_class_model, 'predict_proba'):
-                            proba = self.multi_class_model.predict_proba(X)[0]
-                            confidence = float(max(proba))
+                    if probabilities:
+                        confidence = max(probabilities.values())
                     else:
                         prediction = "Attack"
                 else:

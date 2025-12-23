@@ -1,10 +1,9 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext, filedialog
+from tkinter import ttk, scrolledtext
 import threading
 import time
 import psutil
 from collections import deque
-from pathlib import Path
 import os
 
 from nids.main import Main
@@ -41,6 +40,22 @@ class gui:
         self.last_update_time = 0
         self.update_interval = 0.1  # 100ms for UI updates
         self.resource_update_interval = 1.0  # 1 second for resource updates
+
+        # Model selection
+        self.binary_models = {
+            'KNN': os.path.join(ROOT_DIR, 'model/binary_classification/knn_binary.joblib'),
+            'RF': os.path.join(ROOT_DIR, 'model/binary_classification/rf_binary.joblib'),
+            'XGBoost': os.path.join(ROOT_DIR, 'model/binary_classification/xgb_binary.joblib')
+        }
+        self.multi_class_models = {
+            'KNN': os.path.join(ROOT_DIR, 'model/multi_class_classification/knn_multi_class.joblib'),
+            'RF': os.path.join(ROOT_DIR, 'model/multi_class_classification/rf_multi_class.joblib'),
+            'XGBoost': os.path.join(ROOT_DIR, 'model/multi_class_classification/xgb_multi_class.joblib')
+        }
+        self.scaler_path = os.path.join(ROOT_DIR, 'model/binary_classification/robust_scaler.joblib')
+        self.selected_binary = "KNN"
+        self.selected_multi_class = "KNN"
+        self.use_scaler = True  # Default to True
 
         self.setup_gui()
     
@@ -98,11 +113,21 @@ class gui:
         self.interface_entry.insert(0, "wlp0s20f3")
         self.interface_entry.grid(row=0, column=1, sticky="w", padx=(0, 10))
 
-        # Model
-        ttk.Label(config_frame, text="Model:").grid(row=0, column=2, sticky="w", padx=(0, 2))
-        self.model_entry = ttk.Entry(config_frame, width=40)
-        self.model_entry.insert(0, PATHS["Binary Model"])
-        self.model_entry.grid(row=0, column=3, sticky="we", padx=(0, 10))
+        # Binary Model Selection
+        ttk.Label(config_frame, text="Binary Model:").grid(row=0, column=2, sticky="w", padx=(0, 2))
+        self.binary_combo = ttk.Combobox(config_frame, values=list(self.binary_models.keys()), state="readonly", width=10)
+        self.binary_combo.set(self.selected_binary)
+        self.binary_combo.grid(row=0, column=3, sticky="w", padx=(0, 10))
+
+        # Multi-class Model Selection
+        ttk.Label(config_frame, text="Multi-class Model:").grid(row=0, column=4, sticky="w", padx=(0, 2))
+        self.multi_class_combo = ttk.Combobox(config_frame, values=list(self.multi_class_models.keys()), state="readonly", width=10)
+        self.multi_class_combo.set(self.selected_multi_class)
+        self.multi_class_combo.grid(row=0, column=5, sticky="w", padx=(0, 10))
+
+        # Scaler Checkbox
+        self.scaler_var = tk.BooleanVar(value=self.use_scaler)
+        ttk.Checkbutton(config_frame, text="Use Scaler", variable=self.scaler_var).grid(row=0, column=6, sticky="w", padx=(0, 10))
         
         # System Metrics
         metrics_frame = ttk.Frame(main_frame)
@@ -172,14 +197,19 @@ class gui:
     def validate_parameters(self):
         """Validate all parameters before starting capture."""
         interface = self.interface_entry.get().strip()
-        model_path = self.model_entry.get().strip()
+        selected_binary = self.binary_combo.get().strip()
+        selected_multi_class = self.multi_class_combo.get().strip()
         
         if not interface:
             self._update_log_widget("[ERROR] Network interface is required\n")
             return False
         
-        if not model_path:
-            self._update_log_widget("[ERROR] Model path is required\n")
+        if not selected_binary or selected_binary not in self.binary_models:
+            self._update_log_widget("[ERROR] Valid binary model selection is required\n")
+            return False
+            
+        if not selected_multi_class or selected_multi_class not in self.multi_class_models:
+            self._update_log_widget("[ERROR] Valid multi-class model selection is required\n")
             return False
             
         return True
@@ -193,7 +223,13 @@ class gui:
             return
             
         interface = self.interface_entry.get().strip()
-        model_path = self.model_entry.get().strip()
+        selected_binary = self.binary_combo.get()
+        selected_multi_class = self.multi_class_combo.get()
+        use_scaler = self.scaler_var.get()
+        
+        binary_path = self.binary_models[selected_binary]
+        multi_class_path = self.multi_class_models[selected_multi_class]
+        scaler_path = self.scaler_path if use_scaler else None
         
         # Disable UI during startup
         self._set_ui_state(False)
@@ -202,9 +238,9 @@ class gui:
             # Create the main with all 5 components
             self.main = Main(
                 interface=interface,
-                binary_model_path=model_path,
-                multi_class_model_path=PATHS["Multi-class Model"],
-                scaler_path=PATHS["Scaler"],
+                binary_model_path=binary_path,
+                multi_class_model_path=multi_class_path,
+                scaler_path=scaler_path,
                 output_path=PATHS["Output CSV"],
                 detection_callback=self._on_detection,
                 log_callback=self._update_log_widget
@@ -218,9 +254,12 @@ class gui:
             self.stop_btn.config(state="normal")
             
             self._update_log_widget(f"[*] NIDS started on interface {interface}\n")
-            self._update_log_widget(f"[*] Binary model: {model_path}\n")
-            self._update_log_widget(f"[*] Multi-class model: {PATHS['Multi-class Model']}\n")
-            self._update_log_widget(f"[*] Scaler: {PATHS['Scaler']}\n")
+            self._update_log_widget(f"[*] Binary model: {selected_binary} ({binary_path})\n")
+            self._update_log_widget(f"[*] Multi-class model: {selected_multi_class} ({multi_class_path})\n")
+            if use_scaler:
+                self._update_log_widget(f"[*] Scaler: {scaler_path}\n")
+            else:
+                self._update_log_widget("[*] Scaler: Not used\n")
             self._update_log_widget(f"[*] Flow is saved to: {PATHS['Output CSV']}\n")
             self._update_log_widget("[*] Components: Capturer → Parser → Extractor → Mapper → Detector\n")
             
@@ -234,10 +273,16 @@ class gui:
             self._update_log_widget(f"[ERROR] Failed to start capture: {str(e)}\n")
             self._set_ui_state(True)    
 
-    def _on_detection(self, result: DetectionResult):
-        """Callback for detection results from the Anomaly Detector."""
-        # Detection logging is handled in the pipeline
-        pass
+    def _set_ui_state(self, enabled):
+        """Enable/disable UI elements."""
+        state = "normal" if enabled else "disabled"
+        self.start_btn.config(state=state)
+        self.interface_entry.config(state=state)
+        self.binary_combo.config(state=state)
+        self.multi_class_combo.config(state=state)
+        # Note: Checkbox can remain enabled even when disabled, but we'll disable it too
+        if enabled:
+            self.scaler_var.set(self.use_scaler)  # Reset to default if re-enabling
 
 
     def _monitor_capture(self):
@@ -275,12 +320,10 @@ class gui:
                 print(f"Error in monitor: {e}")
                 break
     
-    def _set_ui_state(self, enabled):
-        """Enable/disable UI elements."""
-        state = "normal" if enabled else "disabled"
-        self.start_btn.config(state=state)
-        self.interface_entry.config(state=state)
-        self.model_entry.config(state=state)
+    def _on_detection(self, result: DetectionResult):
+        """Callback for detection results from the Anomaly Detector."""
+        # Detection logging is handled in the pipeline
+        pass
 
     def stop_capture(self):
         """Stop the NIDS main."""
