@@ -128,10 +128,17 @@ class Main:
         
         self._is_running = False
         
+        # Calculate throughput
+        runtime = time.time() - self._start_time if self._start_time else 0.0
+        packets = self.packet_capturer.packets_captured
+        throughput_pps = packets / runtime if runtime > 0 else 0.0
+        
         self._log(f"[*] NIDS stopped. Statistics:")
-        self._log(f"    - Packets captured: {self.packet_capturer.packets_captured}")
+        self._log(f"    - Packets captured: {packets}")
         self._log(f"    - Flows processed: {self.packet_parser.flows_completed}")
         self._log(f"    - Attacks detected: {self.anomaly_detector.attacks_detected}")
+        self._log(f"    - Runtime: {runtime:.2f} seconds")
+        self._log(f"    - Throughput: {throughput_pps:.2f} pps")
     
     def _gc_worker(self) -> None:
         while not self._gc_stop.is_set():
