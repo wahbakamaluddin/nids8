@@ -263,9 +263,6 @@ class gui:
             self._update_log_widget(f"[*] Flow is saved to: {PATHS['Output CSV']}\n")
             self._update_log_widget("[*] Components: Capturer → Parser → Extractor → Mapper → Detector\n")
             
-            # Start monitoring thread
-            threading.Thread(target=self._monitor_capture, daemon=True).start()
-            
         except PermissionError:
             self._update_log_widget("[ERROR] Permission denied. Try running with sudo.\n")
             self._set_ui_state(True)
@@ -327,27 +324,27 @@ class gui:
 
     def stop_capture(self):
         """Stop the NIDS main."""
-        if self.main and self.capturing:
-            self.capturing = False
+        if not self.main or not self.capturing:
+            return
+        
+        self.capturing = False
+        
+        try:
+            # Give monitoring thread time to exit
+            time.sleep(0.2)
             
-            try:
-                # Stop the main (this flushes all flows)
-                self.main.stop()
-                
-                # Log final statistics
-                self._update_log_widget(f"[*] Final stats: {self.main.packet_capturer.packets_captured} packets, ")
-                self._update_log_widget(f"{self.main.packet_parser.flows_completed} flows, ")
-                self._update_log_widget(f"{getattr(self.main.anomaly_detector, 'attacks_detected', 0)} attacks detected\n")
-                
-            except Exception as e:
-                self._update_log_widget(f"[ERROR] Error stopping capture: {str(e)}\n")
+            # Stop the main (this flushes all flows)
+            self.main.stop()
             
+            self._update_log_widget("[!] NIDS stopped\n")
+                
+        except Exception as e:
+            self._update_log_widget(f"[ERROR] Error stopping capture: {str(e)}\n")
+        finally:
             self.main = None
             self.start_btn.config(state="normal")
             self.stop_btn.config(state="disabled")
             self._set_ui_state(True)
-            
-            self._update_log_widget("[!] NIDS main stopped\n")
 
     def _update_log_widget(self, message):
         """Update the log widget with a new message."""

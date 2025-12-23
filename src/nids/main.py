@@ -94,6 +94,11 @@ class Main:
         self._is_running = True
         self._start_time = time.time()
         
+        # Start metrics monitoring thread if callback provided
+        if self.metrics_callback:
+            self._metrics_thread = threading.Thread(target=self._monitor_metrics, daemon=True)
+            self._metrics_thread.start()
+        
         self._log("[*] NIDS started successfully")
     
     def stop(self) -> None:
@@ -109,6 +114,7 @@ class Main:
         
         # Stop packet capture
         self.packet_capturer.stop()
+        stop_capture_time = time.time()
         
         # Stop garbage collection
         self._gc_stop.set()
@@ -129,7 +135,7 @@ class Main:
         self._is_running = False
         
         # Calculate throughput
-        runtime = time.time() - self._start_time if self._start_time else 0.0
+        runtime = (stop_capture_time - self._start_time) if self._start_time else 0.0
         packets = self.packet_capturer.packets_captured
         throughput_pps = packets / runtime if runtime > 0 else 0.0
         
