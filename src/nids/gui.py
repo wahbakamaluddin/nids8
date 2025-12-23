@@ -219,6 +219,9 @@ class gui:
             
             self._update_log_widget(f"[*] NIDS started on interface {interface}\n")
             self._update_log_widget(f"[*] Binary model: {model_path}\n")
+            self._update_log_widget(f"[*] Multi-class model: {PATHS['Multi-class Model']}\n")
+            self._update_log_widget(f"[*] Scaler: {PATHS['Scaler']}\n")
+            self._update_log_widget(f"[*] Flow is saved to: {PATHS['Output CSV']}\n")
             self._update_log_widget("[*] Components: Capturer → Parser → Extractor → Mapper → Detector\n")
             
             # Start monitoring thread

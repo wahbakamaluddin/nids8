@@ -11,10 +11,10 @@ class DetectionResult:
     is_attack: bool
     prediction_time: float = 0.0
     flow_metadata: Optional[Dict[str, Any]] = None
+    probabilities: Optional[Dict[str, float]] = None
 
 class AnomalyDetector:
-    BINARY_ATTACK_VALUES = {1, "1", "Attack"}
-    BINARY_BENIGN_VALUES = {0, "0", "Benign"}
+
     MULTICLASS_LABEL_MAP = {
         0: "DoS",
         1: "PortScan",
@@ -40,7 +40,7 @@ class AnomalyDetector:
 
 
     def _is_attack(self, binary_pred) -> bool:
-        return binary_pred in self.BINARY_ATTACK_VALUES
+        return binary_pred == 1
     
     # Convert numeric multi-class predictions to string labels
     def _normalize_multiclass_prediction(self, pred) -> str:
@@ -63,6 +63,7 @@ class AnomalyDetector:
         prediction = "Unknown"
         confidence = 0.0
         is_attack = False
+        probabilities = None
         
         try:
             X = features
@@ -81,7 +82,7 @@ class AnomalyDetector:
                     
                     # Stage 2: Multi-class classification
                     if self.multi_class_model is not None:
-                        prediction = self._classify_attack_type(X, flow_metadata)
+                        prediction, probabilities = self._classify_attack_type(X, flow_metadata)
                         
                         # Get confidence from multi-class model
                         if hasattr(self.multi_class_model, 'predict_proba'):
@@ -98,8 +99,8 @@ class AnomalyDetector:
             prediction = "Error"
             confidence = 0.0
         
-        prediction_time = time.perf_counter() - start_time
-        
+        prediction_time = f"{(time.perf_counter() - start_time):.4f} seconds"
+                
         # Update statistics
         if is_attack:
             self._attacks_detected += 1
@@ -111,7 +112,8 @@ class AnomalyDetector:
             confidence=confidence,
             is_attack=is_attack,
             prediction_time=prediction_time,
-            flow_metadata=self._extract_metadata(flow_metadata)
+            flow_metadata=self._extract_metadata(flow_metadata),
+            probabilities=probabilities
         )
         
         # Forward to callback
@@ -124,21 +126,19 @@ class AnomalyDetector:
         self, 
         X: np.ndarray, 
         flow_metadata: Optional[Any]
-    ) -> str:
+    ) -> tuple[str, Optional[Dict[str, float]]]:
         raw_prediction = self.multi_class_model.predict(X)[0]
-        # prediction = self._normalize_multiclass_prediction(prediction)
-        # # Apply domain knowledge heuristics
-        # if flow_metadata is not None and hasattr(flow_metadata, 'dest_port'):
-        #     dest_port = flow_metadata.dest_port
-            
-        #     # SSH/FTP ports with DoS/DDoS might actually be brute force
-        #     if prediction in ("DoS", "DDoS"):
-        #         if dest_port in (21, 22):  # FTP, SSH
-        #             prediction = "Brute Force"
+        
+        probabilities = None
+        # Get probabilities for all classes
+        if hasattr(self.multi_class_model, 'predict_proba'):
+            probs = self.multi_class_model.predict_proba(X)[0]
+            class_names = ["DoS", "PortScan", "BruteForce", "WebAttack", "Bot"]
+            probabilities = {class_name: float(prob) for class_name, prob in zip(class_names, probs)}
         
         prediction = self._normalize_multiclass_prediction(raw_prediction)
         
-        return prediction
+        return prediction, probabilities
     
     def _extract_metadata(self, flow_metadata: Any) -> Optional[Dict[str, Any]]:
         if flow_metadata is None:

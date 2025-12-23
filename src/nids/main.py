@@ -81,7 +81,7 @@ class Main:
         if self._is_running:
             return
         
-        self._log(f"[*] Starting NIDS pipeline on interface {self.interface}")
+        self._log(f"[*] Starting NIDS on interface {self.interface}")
         
         # Start garbage collection thread
         self._gc_stop.clear()
@@ -94,18 +94,18 @@ class Main:
         self._is_running = True
         self._start_time = time.time()
         
-        self._log("[*] NIDS pipeline started successfully")
+        self._log("[*] NIDS started successfully")
     
     def stop(self) -> None:
         """
-        Stop the NIDS pipeline.
+        Stop the NIDS .
         
         This stops packet capture and flushes any remaining flows.
         """
         if not self._is_running:
             return
         
-        self._log("[*] Stopping NIDS pipeline...")
+        self._log("[*] Stopping NIDS ...")
         
         # Stop packet capture
         self.packet_capturer.stop()
@@ -128,7 +128,7 @@ class Main:
         
         self._is_running = False
         
-        self._log(f"[*] NIDS pipeline stopped. Statistics:")
+        self._log(f"[*] NIDS stopped. Statistics:")
         self._log(f"    - Packets captured: {self.packet_capturer.packets_captured}")
         self._log(f"    - Flows processed: {self.packet_parser.flows_completed}")
         self._log(f"    - Attacks detected: {self.anomaly_detector.attacks_detected}")
@@ -165,6 +165,10 @@ class Main:
             output_data = result.flow_metadata.copy()
             output_data['Prediction'] = result.prediction
             output_data['Prediction_Time'] = result.prediction_time
+            output_data['Confidence'] = result.confidence
+            if result.probabilities:
+                for attack_type, prob in result.probabilities.items():
+                    output_data[f'Prob_{attack_type}'] = prob
             self._output_writer.write(output_data)
         
         # Forward to user callback
