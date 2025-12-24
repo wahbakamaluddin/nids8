@@ -77,6 +77,11 @@ class AnomalyDetector:
                     proba = self.binary_model.predict_proba(X)[0]
                     confidence = float(max(proba))
                 
+                # Apply threshold: if predicted as attack (1) and prob < 0.99, switch to benign (0)
+                if binary_pred == 0 and max(proba) < 1.00:
+                    binary_pred = 1 # swithc to attack
+                    confidence = float(max(proba))  # Keep original confidence, or adjust if needed
+                
                 if self._is_attack(binary_pred):
                     is_attack = True
                     
