@@ -263,6 +263,9 @@ class gui:
             self._update_log_widget(f"[*] Flow is saved to: {PATHS['Output CSV']}\n")
             self._update_log_widget("[*] Components: Capturer → Parser → Extractor → Mapper → Detector\n")
             
+            # Start monitoring thread
+            threading.Thread(target=self._monitor_capture, daemon=True).start()
+            
         except PermissionError:
             self._update_log_widget("[ERROR] Permission denied. Try running with sudo.\n")
             self._set_ui_state(True)

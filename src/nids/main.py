@@ -94,11 +94,6 @@ class Main:
         self._is_running = True
         self._start_time = time.time()
         
-        # Start metrics monitoring thread if callback provided
-        if self.metrics_callback:
-            self._metrics_thread = threading.Thread(target=self._monitor_metrics, daemon=True)
-            self._metrics_thread.start()
-        
         self._log("[*] NIDS started successfully")
     
     def stop(self) -> None:
