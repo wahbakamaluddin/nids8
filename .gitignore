@@ -23,7 +23,7 @@ build/
 dist/
 develop-eggs/
 eggs/
-.eggs/
+.eggs/f
 lib/
 lib64/
 parts/
@@ -83,11 +83,6 @@ Thumbs.db
 # ML / data artifacts (adjust as needed)
 # ================================
 *.joblib
-
-# ================================
-# CSV / large generated files
-# ================================
-*.csv
 
 # ================================
 # Secrets (never commit)
