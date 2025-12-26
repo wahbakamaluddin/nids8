@@ -20,7 +20,6 @@ class AnomalyDetector:
         1: "PortScan",
         2: "BruteForce",
         3: "WebAttack",
-        4: "Bot",
     }
     
     def __init__(
@@ -135,7 +134,7 @@ class AnomalyDetector:
         # Get probabilities for all classes
         if hasattr(self.multi_class_model, 'predict_proba'):
             probs = self.multi_class_model.predict_proba(X)[0]
-            class_names = ["DoS", "PortScan", "BruteForce", "WebAttack", "Bot"]
+            class_names = ["DoS", "PortScan", "BruteForce", "WebAttack",]
             probabilities = {class_name: float(prob) for class_name, prob in zip(class_names, probs)}
         
         prediction = self._normalize_multiclass_prediction(raw_prediction)
