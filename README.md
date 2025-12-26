@@ -29,3 +29,22 @@ This notebook cleans, normalizes, and prepares raw network flow data for machine
 - `3_a_ML_Training_Benign_Attack.ipynb`: Trains and evaluates binary classifiers (benign vs. attack) using KNN, Random Forest, and XGBoost.
 - `3_b_ML_Training_Attacks.ipynb`: Trains and evaluates multi-class classifiers for specific attack categories.
 ---
+
+#### Running the NIDS
+1. **Install Requirements**
+    - Install Python 3.8+ and required libraries:
+       ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Prepare Data and Models**
+   - Place pre-trained models in the `model/` directory as needed (download from kaggle here).
+
+3. **Change directory to /src**
+
+5. **Run the NIDS**
+    - Start the GUI for real-time monitoring:
+       ```bash
+       sudo python3 -m nids.gui
+   ```
+---
