@@ -27,6 +27,9 @@ nids8/
 |    |-- helper/              # Utility modules
 |         |-- features/       # Feature calculation modules
 |         |-- other/          # Constants, flow, writer, utils
+|-- model/              # Pre-trained ML models
+|    |-- binary_classification/
+|    |-- multi_class_classification/
 |-- csv/                # Input/output CSVs, flow logs
 |-- log/                # Detection and statistics logs
 |-- demo/               # Demo images (GUI, alerts, logs)
