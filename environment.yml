@@ -1,0 +1,15 @@
+name: nids8
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - joblib
+  - pip
+  - pip:
+      - scapy
+prefix: /Users/wahba/miniforge3/envs/ml1
