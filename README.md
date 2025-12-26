@@ -1,50 +1,110 @@
-Python 3.8+ was used to create the application files. Before running the files, ensure Python 3.8 or newer and the following libraries are installed:
+# NIDS8: Network Intrusion Detection System
 
-| Library    | Task                        |
-| Sklearn    | Machine Learning            |
-| Numpy      | Mathematical Operations     |
-| Pandas     | Data Analysis Tools         |
-| Matplotlib | Graphics and Visualization  |
-| Seaborn    | Advanced Visualization      |
-| Joblib     | Model Serialization         |
+NIDS8 is a modular, machine learning-based Network Intrusion Detection System (NIDS) designed for real-time network traffic analysis, anomaly detection, and attack classification. It provides a GUI for monitoring, supports offline and live packet capture, and leverages advanced feature extraction and ML models for robust detection.
 
-The machine learning implementation phase consists of 3 main steps:
-1. Data Pre-processing
-2. Feature Importance Analysis
-3. Machine Learning Training
+## Features
+
+- Real-time network traffic capture and parsing
+- Feature extraction for network flows (packet count, byte count, timing, flags, etc.)
+- Machine learning-based anomaly and attack detection (binary and multi-class)
+- Extensible feature engineering pipeline
+- CSV logging and statistics output
+- Tkinter-based GUI for live monitoring and control
+- Modular codebase for easy extension and experimentation
+
+## Project Structure
+
+```
+nids8/
+|-- src/nids/           # Core NIDS source code
+|    |-- main.py        # Main NIDS pipeline (capture, parse, extract, detect)
+|    |-- gui.py         # Tkinter GUI for monitoring
+|    |-- anomaly_detector.py  # ML-based anomaly/attack detection
+|    |-- feature_extractor.py # Feature extraction logic
+|    |-- feature_mapper.py    # Feature mapping utilities
+|    |-- packet_capturer.py   # Live packet capture
+|    |-- packet_parser.py     # Packet parsing
+|    |-- helper/              # Utility modules
+|         |-- features/       # Feature calculation modules
+|         |-- other/          # Constants, flow, writer, utils
+|-- csv/                # Input/output CSVs, flow logs
+|-- log/                # Detection and statistics logs
+|-- demo/               # Demo images (GUI, alerts, logs)
+|-- notebook/           # Jupyter notebooks for data analysis
+|-- requirements.txt    # Python dependencies
+|-- environment.yml     # Conda environment
+|-- README.md           # Project documentation
+```
+
+## Installation
+
+### Using Conda (Recommended)
+
+```bash
+conda env create -f environment.yml
+conda activate nids8
+```
+
+### Using pip
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### 1. Run the GUI
+
+```bash
+python -m src.nids.gui
+```
+
+### 2. Run the NIDS pipeline (headless)
+
+```bash
+python -m src.nids.main --interface <network_interface>
+```
+
+### 3. Data Analysis & Notebooks
+
+See the `notebook/` folder for Jupyter notebooks on preprocessing, feature importance, and ML training.
+
+## Input/Output
+
+- **Input:** Live network traffic or CSV files
+- **Output:**
+  - Detection results and statistics in `log/`
+  - Processed flows in `csv/`
+
+## Extending & Customizing
+
+- Add new features: Implement in `src/nids/helper/features/`
+- Add/replace ML models: Update `anomaly_detector.py` and model files
+- Modify GUI: Edit `src/nids/gui.py`
 
 
-### 1 - Data Pre-processing
+## Notebooks Overview
 
-**File:** `1_Data_Preprocessing.ipynb`
-This notebook cleans, normalizes, and prepares raw network flow data for machine learning. Input CSV files should be placed in the `csv/` folder. The output is a processed CSV file used in subsequent steps.
-### 2 - Feature Importance Analysis
+The `notebook/` directory contains Jupyter notebooks for each stage of the NIDS8 pipeline:
 
-**Files:**
-- `2_a_Feature_Importance_Benign_Attack.ipynb`: Analyzes feature importance for distinguishing benign vs. attack traffic using statistical and ML methods.
-- `2_b_Feature_Importance_Attacks_.ipynb`: Focuses on feature importance for different attack types, helping select relevant features for multi-class classification.
-### 3 - Machine Learning Training
+- **1_Data_Preprocessing.ipynb**: Covers the preprocessing steps for network flow data, including loading, cleaning, and preparing the data for feature extraction and machine learning. It is the first step in the NIDS8 pipeline and ensures data quality for subsequent analysis.
+- **2_a_Feature_Importance_Benign_Attack.ipynb**: Analyzes feature importance for distinguishing between benign and attack network flows. It uses machine learning models to identify which features are most relevant for binary classification.
+- **2_b_Feature_Importance_Attacks_.ipynb**: Investigates feature importance for differentiating between various attack types. It applies multi-class classification models to highlight features that best separate different attack categories.
+- **3_a_ML_Training_Benign_Attack.ipynb**: Trains and evaluates machine learning models for binary classification of network flows (benign vs attack). It includes model selection, training, validation, and performance analysis.
+- **3_b_ML_Training_Attacks.ipynb**: Focuses on training and evaluating machine learning models for multi-class classification of attack types. It covers model training, validation, and performance metrics for distinguishing between different attacks.
+- **4_Feature_Importance_Visualization.ipynb**: Visualizes the feature importance results from previous analyses. It provides graphical representations to help interpret which features are most significant for attack detection and classification.
 
-**Files:**
-- `3_a_ML_Training_Benign_Attack.ipynb`: Trains and evaluates binary classifiers (benign vs. attack) using KNN, Random Forest, and XGBoost.
-- `3_b_ML_Training_Attacks.ipynb`: Trains and evaluates multi-class classifiers for specific attack categories.
----
+## Demo
 
-#### Running the NIDS
-1. **Install Requirements**
-    - Install Python 3.8+ and required libraries:
-       ```bash
-   pip install -r requirements.txt
-   ```
+See `demo/` for screenshots:
+- ![GUI Demo](demo/gui_demo.png)
+- ![Alert Demo](demo/alert_demo.png)
+- ![Log Demo](demo/log_demo.png)
 
-2. **Prepare Data and Models**
-   - Place pre-trained models in the `model/` directory as needed (download from kaggle here).
+## License
 
-3. **Change directory to /src**
+MIT License. See LICENSE file if present.
 
-5. **Run the NIDS**
-    - Start the GUI for real-time monitoring:
-       ```bash
-       sudo python3 -m nids.gui
-   ```
----
+## Authors
+
+See project contributors or contact the repository owner.
