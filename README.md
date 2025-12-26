@@ -36,7 +36,28 @@ nids8/
 |-- README.md           # Project documentation
 ```
 
-## Installation
+
+## Model Files
+
+Pre-trained machine learning models are required for detection. Download the models from Kaggle and place them in the appropriate subfolders under `model/`:
+
+- Download from: [https://www.kaggle.com/models/wahbakamaluddin/nids7](https://www.kaggle.com/models/wahbakamaluddin/nids7)
+- Place binary classification models in `model/binary_classification/`
+- Place multi-class classification models in `model/multi_class_classification/`
+- Place scalers in `model/binary_classification/` or as instructed in the notebook/code
+
+The folder structure should look like:
+
+```
+model/
+  binary_classification/
+    <binary_model_files>
+    <scaler_files>
+  multi_class_classification/
+    <multi_class_model_files>
+```
+
+Continue with the installation steps below after placing the models.
 
 ### Using Conda (Recommended)
 
