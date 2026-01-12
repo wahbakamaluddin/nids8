@@ -1,8 +1,6 @@
 # NIDS8: Network Intrusion Detection System
 
-This is a modular, machine learning-based Network Intrusion Detection System (NIDS) designed for real-time network traffic analysis, anomaly detection, and attack classification. It provides a GUI for monitoring, supports offline and live packet capture, and leverages advanced feature extraction and ML models for robust detection.
-
-## Features
+A lightweight ml-based anomaly based NIDS for end devices using machine learning
 
 - Real-time network traffic capture and parsing
 - Feature extraction for network flows (packet count, byte count, timing, flags, etc.)
