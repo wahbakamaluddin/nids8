@@ -1,4 +1,4 @@
-# NIDS8: Network Intrusion Detection System
+Network Intrusion Detection System
 
 A lightweight ml-based anomaly based NIDS for end devices using machine learning
 
