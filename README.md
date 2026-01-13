@@ -8,7 +8,6 @@ A lightweight ml-based anomaly based NIDS for end devices using machine learning
 - Extensible feature engineering pipeline
 - CSV logging and statistics output
 - Tkinter-based GUI for live monitoring and control
-- Modular codebase for easy extension and experimentation
 
 ## Project Structure
 
